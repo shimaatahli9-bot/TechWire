@@ -1,12 +1,16 @@
 # Agent - سياق مشروع مُراسِل
 
+## التحديث الأخير: 2026-02-25
+- تم التبديل من OpenAI إلى Google Gemini API
+- النموذج المستخدم: Gemini 2.5 Flash (مجاني)
+
 ## الملفات الرئيسية:
 - `murrasil/main.py` - نقطة الدخول (FastAPI)
 - `murrasil/database.py` - قاعدة بيانات SQLite
-- `murrasil/fetcher.py` - جلب RSS + تلخيص AI
-- `murrasil/ai_writer.py` - كتابة المقالات
+- `murrasil/fetcher.py` - جلب RSS + تلخيص Gemini AI
+- `murrasil/ai_writer.py` - كتابة المقالات بـ Gemini
 - `murrasil/scheduler.py` - جدولة تلقائية
-- `murrasil/config.py` - الإعدادات
+- `murrasil/config.py` - الإعدادات (GEMINI_API_KEY)
 
 ## API Endpoints:
 - GET /api/news?status=new|approved|rejected
@@ -20,10 +24,15 @@
 ```bash
 cd murrasil
 pip install -r requirements.txt
+# أضف GEMINI_API_KEY في .env
 python main.py
 ```
 
 ## المتغيرات المطلوبة في .env:
-- OPENAI_API_KEY
-- AI_MODEL (gpt-4o-mini)
+- GEMINI_API_KEY (احصل عليه من https://aistudio.google.com/app/apikey)
 - FETCH_INTERVAL_MINUTES (15)
+- MAX_NEWS_AGE_HOURS (48)
+
+## ملفات مهمة:
+- `.env.example` - نموذج الإعدادات
+- `.gitignore` - يستثني .env و news.db

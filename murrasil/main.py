@@ -137,4 +137,9 @@ async def api_update_settings(settings: SettingsUpdate):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host=HOST, port=PORT)
+    uvicorn.run(
+        "main:app",
+        host=HOST,
+        port=PORT,
+        reload=False
+    )

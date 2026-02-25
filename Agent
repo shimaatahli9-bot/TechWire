@@ -2,7 +2,9 @@
 
 ## التحديث الأخير: 2026-02-25
 - تم التبديل من OpenAI إلى Google Gemini API
-- النموذج المستخدم: Gemini 2.5 Flash (مجاني)
+- النموذج المستخدم: Gemini 2.0 Flash (مجاني)
+- إصلاح خطأ في approveNews() في app.js
+- إزالة ai_model من الإعدادات الافتراضية
 
 ## الملفات الرئيسية:
 - `murrasil/main.py` - نقطة الدخول (FastAPI)
@@ -11,6 +13,9 @@
 - `murrasil/ai_writer.py` - كتابة المقالات بـ Gemini
 - `murrasil/scheduler.py` - جدولة تلقائية
 - `murrasil/config.py` - الإعدادات (GEMINI_API_KEY)
+- `murrasil/setup.bat` - الإعداد الأول
+- `murrasil/start.bat` - تشغيل التطبيق
+- `murrasil/stop.bat` - إيقاف التطبيق
 
 ## API Endpoints:
 - GET /api/news?status=new|approved|rejected
@@ -23,6 +28,8 @@
 ## لتشغيل التطبيق:
 ```bash
 cd murrasil
+# Windows: انقر مزدوجاً على setup.bat ثم start.bat
+# أو يدوياً:
 pip install -r requirements.txt
 # أضف GEMINI_API_KEY في .env
 python main.py
@@ -32,6 +39,8 @@ python main.py
 - GEMINI_API_KEY (احصل عليه من https://aistudio.google.com/app/apikey)
 - FETCH_INTERVAL_MINUTES (15)
 - MAX_NEWS_AGE_HOURS (48)
+- HOST (127.0.0.1)
+- PORT (8000)
 
 ## ملفات مهمة:
 - `.env.example` - نموذج الإعدادات

@@ -12,7 +12,7 @@ from database import generate_id, insert_news, get_setting, set_setting, get_sou
 from config import GEMINI_API_KEY
 
 genai.configure(api_key=GEMINI_API_KEY)
-gemini_model = genai.GenerativeModel("gemini-2.5-flash")
+gemini_model = genai.GenerativeModel("gemini-2.0-flash")
 
 logging.basicConfig(
     level=logging.INFO,

@@ -96,7 +96,6 @@ def init_db():
         default_settings = {
             "fetch_interval_minutes": "15",
             "max_news_age_hours": "48",
-            "ai_model": "gpt-4o-mini",
             "last_fetch_time": "",
         }
         for key, value in default_settings.items():

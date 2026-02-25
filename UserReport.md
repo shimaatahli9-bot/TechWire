@@ -137,4 +137,4 @@ murrasil/
 
 ---
 
-*بُني بواسطة Claude Code • يعمل بـ Gemini 2.5 Flash*
+*بُني بواسطة Claude Code • يعمل بـ Gemini 2.0 Flash*

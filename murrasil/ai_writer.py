@@ -8,7 +8,7 @@ from config import GEMINI_API_KEY
 from database import get_news_by_id, update_news_article
 
 genai.configure(api_key=GEMINI_API_KEY)
-gemini_model = genai.GenerativeModel("gemini-2.5-flash")
+gemini_model = genai.GenerativeModel("gemini-2.0-flash")
 
 logger = logging.getLogger(__name__)
 

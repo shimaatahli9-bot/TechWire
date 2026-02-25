@@ -119,6 +119,8 @@ function createNewsCard(item) {
 async function approveNews(id) {
     const card = document.getElementById(`news-${id}`);
     const btn = card.querySelector('button');
+    const titleEl = card.querySelector('h3');
+    const title = titleEl ? titleEl.textContent : '';
     btn.innerHTML = '<div class="spinner mx-auto"></div>';
     btn.disabled = true;
     
@@ -126,7 +128,7 @@ async function approveNews(id) {
         const data = await api(`/api/news/${id}/approve`, { method: 'POST' });
         if (data.success) {
             currentArticle = data.article;
-            showModal(item.title_ar, data.article);
+            showModal(title, data.article);
             card.classList.add('card-exit');
             setTimeout(() => {
                 loadNews();

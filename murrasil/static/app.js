@@ -2,6 +2,8 @@ let currentTab = 'new';
 let currentPage = 1;
 let currentArticle = '';
 let currentLang = localStorage.getItem('lang') || 'ar';
+let allNews = [];
+let searchQuery = '';
 
 const translations = {
     ar: {
@@ -246,25 +248,53 @@ async function loadCounts() {
 async function loadNews() {
     const container = document.getElementById('news-container');
     const loading = document.getElementById('loading');
+    const noResults = document.getElementById('no-results');
     container.innerHTML = '';
+    noResults.classList.add('hidden');
     loading.classList.remove('hidden');
     
     try {
         const data = await api(`/api/news?status=${currentTab}&page=${currentPage}`);
         loading.classList.add('hidden');
         
-        if (data.news.length === 0) {
-            container.innerHTML = `<div class="text-center text-pink-500 py-10 card-bg rounded-xl">${t('no_news')}</div>`;
+        allNews = data.news;
+        
+        if (allNews.length === 0) {
+            container.innerHTML = `<div class="text-center text-accent-secondary py-10 card-bg rounded-xl">${t('no_news')}</div>`;
             return;
         }
         
-        data.news.forEach(item => {
-            container.appendChild(createNewsCard(item));
-        });
+        renderFilteredNews();
     } catch (e) {
         loading.classList.add('hidden');
         container.innerHTML = `<div class="text-center text-red-500 py-10 card-bg rounded-xl">${t('load_error')}: ${e.message}</div>`;
     }
+}
+
+function renderFilteredNews() {
+    const container = document.getElementById('news-container');
+    const noResults = document.getElementById('no-results');
+    
+    let filteredNews = allNews;
+    if (searchQuery) {
+        filteredNews = allNews.filter(item => 
+            (item.title_ar && item.title_ar.toLowerCase().includes(searchQuery)) ||
+            (item.summary_ar && item.summary_ar.toLowerCase().includes(searchQuery)) ||
+            (item.category && item.category.toLowerCase().includes(searchQuery)) ||
+            (item.source_name && item.source_name.toLowerCase().includes(searchQuery)) ||
+            (item.article_ar && item.article_ar.toLowerCase().includes(searchQuery))
+        );
+    }
+    
+    container.innerHTML = '';
+    
+    if (filteredNews.length === 0) {
+        noResults.classList.remove('hidden');
+        return;
+    }
+    
+    noResults.classList.add('hidden');
+    filteredNews.forEach(item => container.appendChild(createNewsCard(item)));
 }
 
 function createNewsCard(item) {
@@ -407,9 +437,25 @@ function copyArticle() {
 function switchTab(tab) {
     currentTab = tab;
     currentPage = 1;
+    searchQuery = '';
+    document.getElementById('search-input').value = '';
+    document.getElementById('clear-search').classList.add('hidden');
     document.querySelectorAll('[id^="tab-"]').forEach(el => el.classList.remove('tab-active'));
     document.getElementById(`tab-${tab}`).classList.add('tab-active');
     loadNews();
+}
+
+function searchNews(query) {
+    searchQuery = query.toLowerCase().trim();
+    document.getElementById('clear-search').classList.toggle('hidden', !searchQuery);
+    renderFilteredNews();
+}
+
+function clearSearch() {
+    document.getElementById('search-input').value = '';
+    searchQuery = '';
+    document.getElementById('clear-search').classList.add('hidden');
+    renderFilteredNews();
 }
 
 async function fetchNews() {

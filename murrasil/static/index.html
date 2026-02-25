@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مُراسِل - لوحة أخبار التقنية</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Tajawal', sans-serif; }
+        .tab-active { border-bottom: 3px solid #3b82f6; color: #3b82f6; }
+        .card-enter { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .card-exit { animation: fadeOut 0.3s ease-out forwards; }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+        .spinner { border: 3px solid #f3f3f3; border-top: 3px solid #3b82f6; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+            <h1 class="text-2xl font-bold text-blue-600">مُراسِل</h1>
+            <div class="flex items-center gap-4">
+                <span id="last-update" class="text-sm text-gray-500"></span>
+                <button onclick="fetchNews()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    جلب الأخبار
+                </button>
+                <button onclick="toggleSettings()" class="text-gray-600 hover:text-blue-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-6xl mx-auto px-4 py-6">
+        <div class="flex border-b border-gray-200 mb-6">
+            <button onclick="switchTab('new')" id="tab-new" class="tab-active px-6 py-3 font-medium text-gray-600 hover:text-blue-600 transition">
+                🆕 أخبار جديدة <span id="count-new" class="bg-blue-100 text-blue-600 text-sm px-2 py-0.5 rounded-full mr-1">0</span>
+            </button>
+            <button onclick="switchTab('approved')" id="tab-approved" class="px-6 py-3 font-medium text-gray-600 hover:text-blue-600 transition">
+                ✅ تمت الموافقة <span id="count-approved" class="bg-green-100 text-green-600 text-sm px-2 py-0.5 rounded-full mr-1">0</span>
+            </button>
+            <button onclick="switchTab('rejected')" id="tab-rejected" class="px-6 py-3 font-medium text-gray-600 hover:text-blue-600 transition">
+                ❌ مرفوضة <span id="count-rejected" class="bg-red-100 text-red-600 text-sm px-2 py-0.5 rounded-full mr-1">0</span>
+            </button>
+        </div>
+
+        <div id="news-container" class="grid gap-4"></div>
+        <div id="loading" class="hidden text-center py-10">
+            <div class="spinner mx-auto"></div>
+            <p class="text-gray-500 mt-2">جاري التحميل...</p>
+        </div>
+    </div>
+
+    <div id="settings-sidebar" class="fixed inset-y-0 left-0 w-80 bg-white shadow-xl transform -translate-x-full transition-transform z-50 overflow-y-auto">
+        <div class="p-4 border-b flex justify-between items-center">
+            <h2 class="text-lg font-bold">الإعدادات</h2>
+            <button onclick="toggleSettings()" class="text-gray-500 hover:text-gray-700">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        <div class="p-4 space-y-6">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">فترة التحديث</label>
+                <select id="fetch-interval" onchange="updateSettings()" class="w-full border rounded-lg px-3 py-2">
+                    <option value="15">15 دقيقة</option>
+                    <option value="30">30 دقيقة</option>
+                    <option value="60">ساعة</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">عمر الأخبار الأقصى</label>
+                <select id="max-age" onchange="updateSettings()" class="w-full border rounded-lg px-3 py-2">
+                    <option value="24">24 ساعة</option>
+                    <option value="48">48 ساعة</option>
+                    <option value="168">أسبوع</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">نموذج AI</label>
+                <select id="ai-model" onchange="updateSettings()" class="w-full border rounded-lg px-3 py-2">
+                    <option value="gpt-4o-mini">GPT-4o-mini</option>
+                    <option value="gpt-4o">GPT-4o</option>
+                    <option value="ollama:llama3">Ollama (llama3)</option>
+                </select>
+            </div>
+            <div>
+                <h3 class="text-sm font-medium text-gray-700 mb-2">المصادر</h3>
+                <div id="sources-list" class="space-y-2 max-h-64 overflow-y-auto"></div>
+            </div>
+            <div class="border-t pt-4">
+                <h3 class="text-sm font-medium text-gray-700 mb-2">إضافة مصدر جديد</h3>
+                <input type="text" id="new-source-name" placeholder="اسم المصدر" class="w-full border rounded-lg px-3 py-2 mb-2">
+                <input type="url" id="new-source-url" placeholder="رابط RSS" class="w-full border rounded-lg px-3 py-2 mb-2">
+                <button onclick="addNewSource()" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">إضافة</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4" onclick="closeModal(event)">
+        <div class="bg-white rounded-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto" onclick="event.stopPropagation()">
+            <div class="p-4 border-b flex justify-between items-center">
+                <h2 id="modal-title" class="text-lg font-bold"></h2>
+                <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div id="modal-content" class="p-4 text-gray-700 leading-relaxed whitespace-pre-wrap"></div>
+            <div class="p-4 border-t flex gap-2 justify-end">
+                <button onclick="copyArticle()" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300">نسخ المقال</button>
+                <button onclick="closeModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed bottom-4 right-4 bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg transform translate-y-full opacity-0 transition-all z-50"></div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

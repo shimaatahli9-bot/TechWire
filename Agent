@@ -1,0 +1,29 @@
+# Agent - سياق مشروع مُراسِل
+
+## الملفات الرئيسية:
+- `murrasil/main.py` - نقطة الدخول (FastAPI)
+- `murrasil/database.py` - قاعدة بيانات SQLite
+- `murrasil/fetcher.py` - جلب RSS + تلخيص AI
+- `murrasil/ai_writer.py` - كتابة المقالات
+- `murrasil/scheduler.py` - جدولة تلقائية
+- `murrasil/config.py` - الإعدادات
+
+## API Endpoints:
+- GET /api/news?status=new|approved|rejected
+- POST /api/news/{id}/approve
+- POST /api/news/{id}/reject
+- POST /api/news/fetch
+- GET /api/sources
+- GET /api/settings
+
+## لتشغيل التطبيق:
+```bash
+cd murrasil
+pip install -r requirements.txt
+python main.py
+```
+
+## المتغيرات المطلوبة في .env:
+- OPENAI_API_KEY
+- AI_MODEL (gpt-4o-mini)
+- FETCH_INTERVAL_MINUTES (15)

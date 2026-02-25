@@ -241,16 +241,12 @@ async function loadSettings() {
     if (settings.max_news_age_hours) {
         document.getElementById('max-age').value = settings.max_news_age_hours;
     }
-    if (settings.ai_model) {
-        document.getElementById('ai-model').value = settings.ai_model;
-    }
 }
 
 async function updateSettings() {
     const settings = {
         fetch_interval_minutes: document.getElementById('fetch-interval').value,
-        max_news_age_hours: document.getElementById('max-age').value,
-        ai_model: document.getElementById('ai-model').value
+        max_news_age_hours: document.getElementById('max-age').value
     };
     await api('/api/settings', {
         method: 'POST',

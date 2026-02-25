@@ -57,3 +57,16 @@ python main.py
 
 ### ملاحظة:
 يحتاج النظام إلى تثبيت Python 3.8+ لتشغيل التطبيق.
+
+### حالة النشر:
+تم رفع المشروع إلى GitHub بنجاح: https://github.com/shimaatahli9-bot/TechWire
+
+---
+
+## ملاحظات إضافية للتشغيل:
+
+1. تأكد من تثبيت Python 3.8 أو أحدث
+2. ثبت المتطلبات: `pip install -r requirements.txt`
+3. أضف مفتاح OpenAI API في ملف `.env`
+4. شغل التطبيق: `python main.py`
+5. افتح المتصفح على: http://127.0.0.1:8000

@@ -12,7 +12,7 @@ from database import (
     get_sources, add_source, update_source, delete_source,
     get_all_settings, set_setting, cleanup_old_news
 )
-from fetcher import fetch_all_news
+from fetcher import fetch_all_news, test_gemini_connection
 from ai_writer import generate_article
 from config import HOST, PORT, FETCH_INTERVAL_MINUTES, MAX_NEWS_AGE_HOURS
 from scheduler import start_scheduler
@@ -43,6 +43,7 @@ class SettingsUpdate(BaseModel):
 @app.on_event("startup")
 async def startup_event():
     init_db()
+    test_gemini_connection()
     start_scheduler()
     asyncio.create_task(run_cleanup_periodically())
 

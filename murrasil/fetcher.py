@@ -1,14 +1,18 @@
 import feedparser
 import json
 import re
+import os
 from datetime import datetime
 from typing import Optional, Dict, Any, List
-import aiohttp
 import asyncio
 import logging
+import google.generativeai as genai
 
 from database import generate_id, insert_news, get_setting, set_setting, get_sources
-from config import OPENAI_API_KEY, AI_MODEL, OLLAMA_BASE_URL
+from config import GEMINI_API_KEY
+
+genai.configure(api_key=GEMINI_API_KEY)
+gemini_model = genai.GenerativeModel("gemini-2.5-flash")
 
 logging.basicConfig(
     level=logging.INFO,
@@ -21,6 +25,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 CATEGORIES = ["نماذج AI", "أبحاث", "أدوات", "شركات ناشئة", "أجهزة", "سياسات"]
+
+_last_error_shown = False
 
 
 def clean_html(text: str) -> str:
@@ -50,68 +56,28 @@ def detect_category(title: str, content: str) -> str:
     return "نماذج AI"
 
 
-async def call_ai_openai(prompt: str) -> Optional[str]:
-    if not OPENAI_API_KEY:
-        logger.error("OPENAI_API_KEY not set")
+def call_ai(prompt: str) -> Optional[str]:
+    global _last_error_shown
+    if not GEMINI_API_KEY:
+        logger.error("GEMINI_API_KEY not set")
         return None
     
     try:
-        async with aiohttp.ClientSession() as session:
-            headers = {
-                "Authorization": f"Bearer {OPENAI_API_KEY}",
-                "Content-Type": "application/json"
-            }
-            data = {
-                "model": AI_MODEL,
-                "messages": [{"role": "user", "content": prompt}],
-                "temperature": 0.7,
-                "max_tokens": 1000
-            }
-            async with session.post(
-                "https://api.openai.com/v1/chat/completions",
-                headers=headers,
-                json=data
-            ) as response:
-                if response.status == 200:
-                    result = await response.json()
-                    return result["choices"][0]["message"]["content"]
-                else:
-                    error_text = await response.text()
-                    logger.error(f"OpenAI API error: {response.status} - {error_text}")
-                    return None
+        response = gemini_model.generate_content(prompt)
+        return response.text
     except Exception as e:
-        logger.error(f"OpenAI API call failed: {e}")
+        error_msg = str(e)
+        logger.error(f"Gemini API error: {error_msg}")
+        if "quota" in error_msg.lower() or "auth" in error_msg.lower() or "api_key" in error_msg.lower():
+            if not _last_error_shown:
+                _last_error_shown = True
+                print("\n⚠️ خطأ في الاتصال بـ Gemini API — تحقق من المفتاح في ملف .env\n")
         return None
 
 
-async def call_ai_ollama(prompt: str) -> Optional[str]:
-    try:
-        async with aiohttp.ClientSession() as session:
-            data = {
-                "model": AI_MODEL.replace("ollama:", ""),
-                "prompt": prompt,
-                "stream": False
-            }
-            async with session.post(
-                f"{OLLAMA_BASE_URL}/api/generate",
-                json=data
-            ) as response:
-                if response.status == 200:
-                    result = await response.json()
-                    return result.get("response", "")
-                else:
-                    error_text = await response.text()
-                    logger.error(f"Ollama API error: {response.status} - {error_text}")
-                    return None
-    except Exception as e:
-        logger.error(f"Ollama API call failed: {e}")
-        return None
-
-
-async def call_ai(prompt: str) -> Optional[str]:
-    if AI_MODEL.startswith("ollama:"):
-        return await call_ai_ollama(prompt)
-    return await call_ai_openai(prompt)
+async def call_ai_async(prompt: str) -> Optional[str]:
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, call_ai, prompt)
 
 
 async def summarize_article(title: str, content: str) -> Optional[Dict[str, str]]:
@@ -126,7 +92,7 @@ Article content/description: {content[:2000]}
 
 Return ONLY valid JSON, no explanation."""
 
-    response = await call_ai(prompt)
+    response = await call_ai_async(prompt)
     if not response:
         return None
     
@@ -223,3 +189,15 @@ async def fetch_all_news() -> int:
     set_setting("last_fetch_time", datetime.now().isoformat())
     logger.info(f"Fetch complete. {new_count} new articles.")
     return new_count
+
+
+def test_gemini_connection() -> bool:
+    try:
+        response = gemini_model.generate_content("Say 'OK' if you can read this.")
+        if response.text:
+            logger.info("Gemini API connection successful")
+            return True
+    except Exception as e:
+        logger.error(f"Gemini API connection failed: {e}")
+        return False
+    return False

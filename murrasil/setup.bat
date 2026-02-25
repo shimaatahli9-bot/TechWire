@@ -1,56 +1,56 @@
 @echo off
-chcp 65001 >nul
-title مُراسِل - الإعداد الأول
+chcp 65001 >nul 2>&1
+title Murrasil - Setup
 
 echo.
-echo ╔══════════════════════════════════════╗
-echo ║        مُراسِل - إعداد المشروع        ║
-echo ╚══════════════════════════════════════╝
+echo ========================================
+echo      Murrasil - Project Setup
+echo ========================================
 echo.
 
 :: Check Python
 python --version >nul 2>&1
 if errorlevel 1 (
-    echo [!] خطأ: Python غير مثبت على جهازك
-    echo [!] حمّله من: https://www.python.org/downloads/
+    echo [ERROR] Python is not installed
+    echo [INFO] Download from: https://www.python.org/downloads/
     pause
     exit /b 1
 )
-echo [✓] Python موجود
+echo [OK] Python found
 
 :: Create virtual environment
 if not exist "venv" (
-    echo [+] جاري إنشاء البيئة الافتراضية...
+    echo [INFO] Creating virtual environment...
     python -m venv venv
-    echo [✓] تم إنشاء البيئة الافتراضية
+    echo [OK] Virtual environment created
 ) else (
-    echo [✓] البيئة الافتراضية موجودة مسبقاً
+    echo [OK] Virtual environment already exists
 )
 
 :: Activate and install dependencies
-echo [+] جاري تثبيت المكتبات...
+echo [INFO] Installing dependencies...
 call venv\Scripts\activate.bat
 pip install -r requirements.txt --quiet
-echo [✓] تم تثبيت جميع المكتبات
+echo [OK] All dependencies installed
 
 :: Create .env from .env.example if not exists
 if not exist ".env" (
     copy .env.example .env >nul
     echo.
-    echo ╔══════════════════════════════════════════════════════╗
-    echo ║  [!] تم إنشاء ملف .env                              ║
-    echo ║  [!] افتحه والصق مفتاح Gemini API في السطر الأول   ║
-    echo ║  [!] احصل على المفتاح من:                           ║
-    echo ║      https://aistudio.google.com/app/apikey          ║
-    echo ╚══════════════════════════════════════════════════════╝
+    echo ================================================
+    echo  [!] .env file created
+    echo  [!] Open it and paste your Gemini API key
+    echo  [!] Get your key from:
+    echo      https://aistudio.google.com/app/apikey
+    echo ================================================
     echo.
     pause
     start notepad .env
 ) else (
-    echo [✓] ملف .env موجود مسبقاً
+    echo [OK] .env file already exists
 )
 
 echo.
-echo [✓] اكتمل الإعداد! الآن شغّل start.bat
+echo [OK] Setup complete! Now run start.bat
 echo.
 pause

@@ -1,8 +1,8 @@
 @echo off
-chcp 65001 >nul
-title مُراسِل - إيقاف التشغيل
+chcp 65001 >nul 2>&1
+title Murrasil - Stop
 
-echo [+] جاري إيقاف الخادم...
+echo [INFO] Stopping server...
 taskkill /f /im python.exe >nul 2>&1
-echo [✓] تم إيقاف مُراسِل
+echo [OK] Murrasil stopped
 timeout /t 2 /nobreak >nul
